@@ -1,0 +1,504 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  background: #F5F5F5;
+  color: #333;
+  padding: 10px;
+}
+
+.page { display: none; }
+.page.active { display: block; }
+
+/* LOGIN SCREEN */
+.login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #009639 0%, #ED1C24 100%);
+}
+.login-card {
+  background: white;
+  padding: 30px 20px;
+  border-radius: 20px;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+}
+.login-logo { width: 100px; margin-bottom: 15px; }
+.login-subtitle { color: #ED1C24; font-weight: bold; margin-bottom: 20px; }
+
+.profile-upload {
+  margin: 20px 0;
+}
+.profile-upload img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #009639;
+  margin-bottom: 10px;
+}
+#profilePic, #accountPic { display: none; }
+.upload-btn {
+  display: inline-block;
+  padding: 8px 15px;
+  background: #009639;
+  color: white;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#loginName, #accountName {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  font-size: 16px;
+  margin: 15px 0;
+  text-align: center;
+}
+
+/* HEADER */
+.header {
+  text-align: center;
+  background: white;
+  padding: 15px;
+  border-radius: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.logo { width: 80px; margin-bottom: 8px; }
+.header h1 { font-size: 18px; color: #009639; margin-bottom: 4px; }
+.station-name { font-size: 13px; color: #ED1C24; font-weight: bold; }
+
+/* DATE TIME CARD */
+.datetime-card {
+  background: white;
+  padding: 12px 15px;
+  border-radius: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+.staff-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+}
+#staffPhoto {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #009639;
+  cursor: pointer;
+}
+#staffPhoto:active { transform: scale(0.95); }
+#currentDateTime { font-size: 12px; color: #009639; font-weight: 600; }
+.shift-label { font-size: 14px; font-weight: bold; margin: 2px 0; }
+.day-shift { color: #FF9800; }
+.night-shift { color: #3F51B5; }
+.staff-name-display {
+  font-size: 13px;
+  color: #333;
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+.manage-link {
+  background: none;
+  border: none;
+  color: #009639;
+  font-size: 12px;
+  padding: 0;
+  margin: 4px 0 0;
+  text-decoration: underline;
+  cursor: pointer;
+  width: auto;
+  box-shadow: none;
+}
+
+/* LOGOUT BUTTON WITH TEXT */
+.logout-wrapper {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.logout-text {
+  font-size: 10px;
+  font-weight: bold;
+  color: #ED1C24;
+  letter-spacing: 0.5px;
+}
+.logout-btn {
+  width: 45px;
+  height: 45px;
+  padding: 0;
+  font-size: 20px;
+  background: linear-gradient(135deg, #ED1C24, #C62828);
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(237,28,36,0.3);
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+.logout-btn:active {
+  transform: scale(0.95);
+  background: #B71C1C;
+}
+
+/* CARDS */
+.card {
+  background: white;
+  padding: 18px;
+  border-radius: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+.card h2 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: #009639;
+  text-align: center;
+}
+.section { margin-bottom: 18px; }
+.section-title {
+  font-size: 13px;
+  font-weight: bold;
+  color: #ED1C24;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.sub-title {
+  font-size: 12px;
+  color: #666;
+  margin: 8px 0 5px;
+  font-weight: 600;
+}
+.row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.row label {
+  width: 60px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.row input {
+  flex: 1;
+  padding: 10px;
+  border: 2px solid #E0E0E0;
+  border-radius: 8px;
+  font-size: 15px;
+}
+.row input:focus {
+  outline: none;
+  border-color: #009639;
+}
+
+/* MONEY INPUT WITH COMMAS */
+.money-input {
+  text-align: right;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+/* BUTTONS */
+button {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #009639, #00A651);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 8px;
+  box-shadow: 0 4px 12px rgba(0,150,57,0.3);
+}
+button:active { transform: scale(0.98); }
+
+.print-btn {
+  background: linear-gradient(135deg, #2196F3, #1976D2);
+  margin-top: 15px;
+}
+.whatsapp-btn {
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+  margin-top: 12px;
+  box-shadow: 0 4px 15px rgba(37,211,102,0.4);
+}
+
+.add-invoice-btn {
+  background: #FF9800;
+  padding: 10px;
+  font-size: 14px;
+}
+.save-account-btn {
+  background: linear-gradient(135deg, #009639, #00A651);
+  margin-top: 15px;
+}
+.back-btn {
+  background: #757575;
+  margin-top: 10px;
+}
+
+/* NAVIGATION */
+.nav-buttons {
+  display: flex;
+  gap: 8px;
+  margin: 15px 0;
+}
+.nav-btn {
+  flex: 1;
+  padding: 12px;
+  font-size: 14px;
+  background: #E0E0E0;
+  color: #333;
+  margin: 0;
+}
+.nav-btn.active {
+  background: linear-gradient(135deg, #009639, #00A651);
+  color: white;
+}
+
+/* SECTIONS */
+.grand-sales {
+  background: #E8F5E9;
+  padding: 12px;
+  border-radius: 10px;
+  border-left: 4px solid #009639;
+}
+.total-deductions {
+  background: #FFF3E0;
+  padding: 12px;
+  border-radius: 10px;
+  border-left: 4px solid #FF9800;
+}
+.cash-balance {
+  background: #E3F2FD;
+  padding: 12px;
+  border-radius: 10px;
+  border-left: 4px solid #2196F3;
+}
+.safe-section {
+  background: #F3E5F5;
+  padding: 12px;
+  border-radius: 10px;
+  border-left: 4px solid #9C27B0;
+}
+
+.grand-total {
+  background: linear-gradient(135deg, #009639, #00A651);
+  color: white;
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  margin: 20px 0;
+  box-shadow: 0 5px 20px rgba(0,150,57,0.4);
+}
+.grand-total h2 { font-size: 14px; margin-bottom: 8px; color: white; }
+.grand-total p { font-size: 28px; font-weight: bold; }
+
+/* ACCOUNT PAGE */
+.account-card { max-width: 450px; margin: 20px auto; }
+#accountPhoto {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #009639;
+  margin: 0 auto 15px;
+  display: block;
+}
+
+/* CUSTOM TOAST DIALOG */
+.toast {
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #009639, #00A651);
+  color: white;
+  padding: 14px 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,150,57,0.4);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: bold;
+  font-size: 15px;
+  transition: top 0.4s ease;
+  max-width: 90%;
+}
+.toast.show { top: 20px; }
+.toast-icon { font-size: 20px; }
+
+/* CUSTOM LOGOUT DIALOG */
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+.dialog-overlay.show { display: flex; }
+.dialog-box {
+  background: white;
+  padding: 25px 20px;
+  border-radius: 18px;
+  max-width: 320px;
+  width: 85%;
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.dialog-icon { font-size: 45px; margin-bottom: 10px; }
+.dialog-box h3 { color: #ED1C24; margin: 0 0 8px; font-size: 20px; }
+.dialog-box p { color: #555; margin: 0 0 20px; font-size: 15px; }
+.dialog-buttons { display: flex; gap: 10px; }
+.dialog-btn {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+}
+.dialog-btn.cancel { background: #E0E0E0; color: #333; }
+.dialog-btn.confirm {
+  background: linear-gradient(135deg, #ED1C24, #C62828);
+  color: white;
+}
+
+/* FOOTER */
+.dev-footer {
+  background: #1A1A1A;
+  color: #CCC;
+  text-align: center;
+  padding: 25px 15px;
+  border-radius: 15px;
+  margin-top: 30px;
+}
+.dev-footer h3 { color: #009639; font-size: 18px; margin: 8px 0; }
+.tagline { font-size: 12px; color: #999; margin: 5px 0; }
+.contact { font-size: 13px; color: #ED1C24; margin-top: 10px; }
+.contact-info { font-size: 13px; color: #CCC; margin: 3px 0; }
+
+/* PRINT */
+@media print {
+  body { background: white; padding: 0; }
+ .nav-buttons,.print-btn,.whatsapp-btn, button,.login-screen { display: none!important; }
+ .card { box-shadow: none; border: 1px solid #ddd; page-break-inside: avoid; }
+  input[readonly] { border: none; background: transparent; }
+}
+
+/* Add this to your existing CSS */
+
+/* PIN INPUT STYLE */
+#createPin, #confirmPin, #loginPin, #newPin {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  font-size: 18px;
+  margin: 10px 0;
+  text-align: center;
+  letter-spacing: 8px;
+  font-weight: bold;
+}
+#createPin:focus, #confirmPin:focus, #loginPin:focus, #newPin:focus {
+  border-color: #009639;
+  outline: none;
+}
+
+#welcomeName {
+  font-size: 20px;
+  color: #009639;
+  margin: 10px 0 15px;
+  font-weight: bold;
+}
+
+.switch-user-btn {
+  background: #757575;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+/* Hide create account section by default, JS will show it */
+#createAccountSection { display: block; }
+
+/* Add to your existing CSS */
+
+/* HISTORY BUTTON */
+.history-btn {
+  width: 45px;
+  height: 45px;
+  padding: 0;
+  font-size: 20px;
+  background: linear-gradient(135deg, #2196F3, #1976D2);
+  border-radius: 12px;
+  box-shadow: 0 3px 10px rgba(33,150,243,0.3);
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+.history-btn:active { transform: scale(0.95); }
+
+/* LOGOUT BUTTON BOTTOM */
+.logout-btn-bottom {
+  background: linear-gradient(135deg, #ED1C24, #C62828);
+  margin-top: 20px;
+  box-shadow: 0 4px 15px rgba(237,28,36,0.4);
+}
+
+/* HISTORY LIST */
+.history-box { max-width: 380px; max-height: 80vh; }
+.history-list {
+  max-height: 350px;
+  overflow-y: auto;
+  text-align: left;
+  margin: 15px 0;
+}
+.history-item {
+  background: #F5F5F5;
+  padding: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border-left: 4px solid #009639;
+}
+.history-date {
+  font-weight: bold;
+  color: #ED1C24;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.history-amount {
+  font-size: 18px;
+  font-weight: bold;
+  color: #009639;
+}

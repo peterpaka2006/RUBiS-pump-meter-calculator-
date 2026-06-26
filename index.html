@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>RUBIS Pump Calculator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- SCREEN 1: LOGIN/PIN SCREEN -->
+<div id="loginPage" class="page active login-screen">
+  <div class="login-card">
+    <img src="rubis-logo.png" alt="RUBIS Logo" class="login-logo">
+    <h1>RUBIS ENERGY UGANDA</h1>
+    <p class="login-subtitle" id="loginSubtitle">Staff Login</p>
+
+    <div id="createAccountSection">
+      <div class="profile-upload">
+        <img id="profilePreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='50' fill='%23E0E0E0'/%3E%3Cpath d='M50 30a15 15 0 1 0 0 30 15 15 0 0 0 0-30zm0 40c-20 0-40 10-40 30h80c0-20-20-30-40-30z' fill='%23999'/%3E%3C/svg%3E" alt="Profile">
+        <label for="profilePic" class="upload-btn">📷 Upload Photo</label>
+        <input type="file" id="profilePic" accept="image/*">
+      </div>
+
+      <input type="text" id="loginName" placeholder="Enter your full name" autocomplete="off">
+      <input type="password" id="createPin" placeholder="Create 4-digit PIN" maxlength="4" inputmode="numeric">
+      <input type="password" id="confirmPin" placeholder="Confirm PIN" maxlength="4" inputmode="numeric">
+
+      <select id="secQuestion" style="width:100%;padding:12px;border:2px solid #ddd;border-radius:10px;margin:10px 0;font-size:15px;">
+        <option value="">Select Security Question</option>
+        <option value="mother">What is your mother's name?</option>
+        <option value="school">What primary school did you attend?</option>
+        <option value="village">What village were you born in?</option>
+        <option value="pet">What is your favorite animal?</option>
+      </select>
+      <input type="text" id="secAnswer" placeholder="Your answer" autocomplete="off">
+
+      <button onclick="createAccount()">🔒 CREATE ACCOUNT</button>
+    </div>
+
+    <div id="pinLoginSection" style="display:none;">
+      <div class="profile-upload">
+        <img id="savedProfile" src="" alt="Profile">
+      </div>
+      <h3 id="welcomeName">Welcome Back</h3>
+      <input type="password" id="loginPin" placeholder="Enter 4-digit PIN" maxlength="4" inputmode="numeric">
+      <button onclick="loginWithPin()">🔓 UNLOCK</button>
+      <p style="margin-top:15px;font-size:13px;color:#666;">Forgot PIN?</p>
+      <button class="switch-user-btn" onclick="showResetPin()" style="background:#FF9800;">🔑 Reset My PIN</button>
+      <button class="switch-user-btn" onclick="switchUser()">🔄 Switch User</button>
+    </div>
+
+    <!-- NEW: PIN RESET SCREEN -->
+    <div id="resetPinSection" style="display:none;">
+      <h3>Reset Your PIN</h3>
+      <p id="resetQuestion" style="color:#009639;font-weight:bold;margin:15px 0;"></p>
+      <input type="text" id="resetAnswer" placeholder="Enter your answer" autocomplete="off">
+      <input type="password" id="newPin1" placeholder="New 4-digit PIN" maxlength="4" inputmode="numeric">
+      <input type="password" id="newPin2" placeholder="Confirm new PIN" maxlength="4" inputmode="numeric">
+      <button onclick="resetMyPin()">✅ Reset PIN</button>
+      <button class="switch-user-btn" onclick="backToLogin()">← Back to Login</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 2: MAIN APP -->
+<div id="appContainer" style="display:none;">
+
+<div class="datetime-card">
+  <div class="staff-header">
+    <img id="staffPhoto" src="" alt="Staff" onclick="showPage('account')">
+    <div>
+      <p id="currentDateTime"></p>
+      <p class="shift-label" id="shiftLabel">SHIFT</p>
+      <p class="staff-name-display">Staff: <span id="staffNameDisplay"></span></p>
+      <button class="manage-link" onclick="showPage('account')">⚙️ Manage Account</button>
+    </div>
+
+    <div class="logout-wrapper">
+      <button class="history-btn" onclick="showHistory()">📊</button>
+      <span class="logout-text">HISTORY</span>
+    </div>
+  </div>
+</div>
+
+<div class="header">
+  <img src="rubis-logo.png" alt="RUBIS Logo" class="logo">
+  <h1>RUBIS ENERGY UGANDA</h1>
+  <p class="station-name">PUMP METER CALCULATOR</p>
+</div>
+
+<div class="card price-card">
+  <h2>💰 FUEL PRICES - UGX/Liter</h2>
+  <div class="row">
+    <label>PMS:</label>
+    <input type="number" id="pricePMS" value="6690" step="10">
+  </div>
+  <div class="row">
+    <label>AGO:</label>
+    <input type="number" id="priceAGO" value="6649" step="10">
+  </div>
+</div>
+
+<div id="metersPage" class="page active">
+<div class="card pump-a">
+  <h2>⛽ PUMP A</h2>
+  <div class="section">
+    <div class="section-title">METERS - O/M Opening, C/M Closing</div>
+    <div class="sub-title">O/M [Opening Meters]</div>
+    <div class="row"><label>PMS:</label><input type="number" id="a-openPMS" step="0.001"></div>
+    <div class="row"><label>AGO:</label><input type="number" id="a-openAGO" step="0.001"></div>
+    <div class="sub-title">C/M [Closing Meters]</div>
+    <div class="row"><label>PMS:</label><input type="number" id="a-closePMS" step="0.001"></div>
+    <div class="row"><label>AGO:</label><input type="number" id="a-closeAGO" step="0.001"></div>
+  </div>
+  <div class="section">
+    <div class="section-title">LITERS - Auto</div>
+    <div class="row"><label>PMS:</label><input type="text" id="a-litersPMS" readonly></div>
+    <div class="row"><label>AGO:</label><input type="text" id="a-litersAGO" readonly></div>
+  </div>
+  <div class="section">
+    <div class="section-title">MONEY - UGX</div>
+    <div class="row"><label>PMS:</label><input type="text" id="a-moneyPMS" readonly></div>
+    <div class="row"><label>AGO:</label><input type="text" id="a-moneyAGO" readonly></div>
+  </div>
+  <div class="section grand-sales">
+    <div class="section-title">GRAND SALES [Pump A Total]</div>
+    <div class="row"><label>Total:</label><input type="text" id="a-grandSales" readonly></div>
+  </div>
+  <button onclick="resetPump('a')">🔄 Reset Pump A</button>
+</div>
+
+<div class="card pump-b">
+  <h2>⛽ PUMP B</h2>
+  <div class="section">
+    <div class="section-title">METERS - O/M Opening, C/M Closing</div>
+    <div class="sub-title">O/M [Opening Meters]</div>
+    <div class="row"><label>PMS:</label><input type="number" id="b-openPMS" step="0.001"></div>
+    <div class="row"><label>AGO:</label><input type="number" id="b-openAGO" step="0.001"></div>
+    <div class="sub-title">C/M [Closing Meters]</div>
+    <div class="row"><label>PMS:</label><input type="number" id="b-closePMS" step="0.001"></div>
+    <div class="row"><label>AGO:</label><input type="number" id="b-closeAGO" step="0.001"></div>
+  </div>
+  <div class="section">
+    <div class="section-title">LITERS - Auto</div>
+    <div class="row"><label>PMS:</label><input type="text" id="b-litersPMS" readonly></div>
+    <div class="row"><label>AGO:</label><input type="text" id="b-litersAGO" readonly></div>
+  </div>
+  <div class="section">
+    <div class="section-title">MONEY - UGX</div>
+    <div class="row"><label>PMS:</label><input type="text" id="b-moneyPMS" readonly></div>
+    <div class="row"><label>AGO:</label><input type="text" id="b-moneyAGO" readonly></div>
+  </div>
+  <div class="section grand-sales">
+    <div class="section-title">GRAND SALES [Pump B Total]</div>
+    <div class="row"><label>Total:</label><input type="text" id="b-grandSales" readonly></div>
+  </div>
+  <button onclick="resetPump('b')">🔄 Reset Pump B</button>
+</div>
+
+<div class="grand-total">
+  <h2>🏦 FINAL GRAND TOTAL - All Pumps</h2>
+  <p id="grandTotal">0 UGX</p>
+</div>
+</div>
+
+<div class="nav-buttons">
+  <button class="nav-btn active" onclick="showPage('meters')">📊 METERS</button>
+  <button class="nav-btn" onclick="showPage('cash')">💰 CASH & INVOICES</button>
+</div>
+
+<div id="cashPage" class="page">
+  <div class="card cash-card">
+    <h2>💳 TRANSACTIONS & INVOICES</h2>
+    <div class="section">
+      <div class="section-title">MOBILE MONEY</div>
+      <div class="row"><label>Momo:</label><input type="text" id="momoAmount" class="money-input" placeholder="0"></div>
+      <div class="row"><label>Airtel:</label><input type="text" id="airtelAmount" class="money-input" placeholder="0"></div>
+    </div>
+    <div class="section safe-section">
+      <div class="section-title">SAFE [Money Safed]</div>
+      <div class="row"><label>Amount:</label><input type="text" id="safeAmount" class="money-input" placeholder="0"></div>
+    </div>
+    <div class="section">
+      <div class="section-title">INVOICES [Credit Customers]</div>
+      <div id="invoicesContainer">
+        <div class="invoice-row">
+          <div class="row"><label>Amount:</label><input type="text" class="invAmount money-input" placeholder="UGX"></div>
+          <div class="row"><label>Name:</label><input type="text" class="invName" placeholder="Customer Name"></div>
+          <div class="row"><label>Plate:</label><input type="text" class="invPlate" placeholder="UAX 123X"></div>
+        </div>
+      </div>
+      <button type="button" class="add-invoice-btn" onclick="addInvoice()">➕ Add Invoice</button>
+    </div>
+    <div class="section total-deductions">
+      <div class="section-title">TOTAL DEDUCTIONS</div>
+      <div class="row"><label>Total:</label><input type="text" id="totalDeductions" readonly></div>
+    </div>
+    <div class="section cash-balance">
+      <div class="section-title">C/B [CASH BALANCE]</div>
+      <div class="row"><label>Cash:</label><input type="text" id="cashBalance" readonly></div>
+    </div>
+    <button class="print-btn" onclick="printReport()">🖨️ PRINT SHIFT REPORT</button>
+    <button class="whatsapp-btn" onclick="sendWhatsApp()">📱 SEND TO WHATSAPP</button>
+    <button class="logout-btn-bottom" onclick="showLogoutDialog()">🚪 LOG OUT & LOCK</button>
+  </div>
+</div>
+
+<div id="accountPage" class="page">
+  <div class="card account-card">
+    <h2>⚙️ MANAGE ACCOUNT</h2>
+    <p style="text-align:center; color:#666; margin-bottom:20px;">Update your profile & PIN</p>
+
+    <div class="profile-upload">
+      <img id="accountPhoto" src="" alt="Profile">
+      <label for="accountPic" class="upload-btn">📷 Change Photo</label>
+      <input type="file" id="accountPic" accept="image/*">
+    </div>
+
+    <div class="row" style="margin-top:20px;">
+      <label>Full Name:</label>
+      <input type="text" id="accountName" placeholder="Enter name">
+    </div>
+
+    <div class="row">
+      <label>New PIN:</label>
+      <input type="password" id="newPin" placeholder="4 digits" maxlength="4" inputmode="numeric">
+    </div>
+
+    <button class="save-account-btn" onclick="saveAccount()">💾 Save Changes</button>
+    <button class="back-btn" onclick="showPage('meters')">← Back to Meters</button>
+  </div>
+</div>
+
+<footer class="dev-footer">
+  <p>⚡ System Developed by</p>
+  <h3>PETERPAKA TEC GUY</h3>
+  <p class="tagline">Fuel Station Digital Solutions | Kampala, Uganda</p>
+  <p class="contact">For custom systems: contact Vai</p>
+  <p class="contact-info">📞 +256767870094</p>
+  <p class="contact-info">💌 peterpakaug@gmail.com</p>
+</footer>
+
+</div>
+
+<div id="toast" class="toast">
+  <span class="toast-icon">✅</span>
+  <span id="toastMessage">Success!</span>
+</div>
+
+<div id="logoutDialog" class="dialog-overlay">
+  <div class="dialog-box">
+    <div class="dialog-icon">🚪</div>
+    <h3>Lock Screen?</h3>
+    <p>Logout and require PIN?</p>
+    <div class="dialog-buttons">
+      <button class="dialog-btn cancel" onclick="hideLogoutDialog()">Cancel</button>
+      <button class="dialog-btn confirm" onclick="confirmLogout()">LOCK</button>
+    </div>
+  </div>
+</div>
+
+<div id="historyDialog" class="dialog-overlay">
+  <div class="dialog-box history-box">
+    <div class="dialog-icon">📊</div>
+    <h3>Sales History</h3>
+    <div id="historyList" class="history-list">
+      <p style="color:#999;">No history yet</p>
+    </div>
+    <button class="dialog-btn confirm" onclick="hideHistory()" style="margin-top:15px;width:100%;">Close</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
