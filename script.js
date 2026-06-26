@@ -20,7 +20,7 @@ function showToast(message, type = 'success') {
 }
 
 function saveHistory() {
-  const grandTotal = unformatNumber(document.getElementById('grandTotal').textContent.replace(' UGX', ''));
+  const grandTotal = unformatNumber(document.getElementById('grandTotal').textContent.replace(' UGX',''));
   if (grandTotal <= 0) return;
 
   const today = new Date().toLocaleDateString('en-UG');
@@ -47,7 +47,7 @@ function showHistory() {
     historyList.innerHTML = history.map(item => `
       <div class="history-item">
         <div class="history-date">Date: ${item.date}</div>
-        <div class="history-amount">Money made: ${item.amount.toLocaleString('en-US')} UGX</div>
+        <div class="history-amount">Money made: ${formatNumber(item.amount)} UGX</div>
       </div>
     `).join('');
   }
@@ -315,20 +315,26 @@ function updateDateTime() {
 updateDateTime();
 setInterval(updateDateTime, 60000);
 
+// FIXED: Format number with commas, no decimals for UGX cash
 function formatNumber(num) {
-  if (!num) return '';
-  return num.toString().replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  if (num === '' || num === null || isNaN(num)) return '';
+  num = Math.round(Number(num)); // Round to whole UGX
+  return num.toLocaleString('en-US'); // 3155715 → 3,155,715
 }
 
+// FIXED: Parse number correctly, keep decimals for calculation
 function unformatNumber(str) {
-  return parseFloat(str.replace(/,/g, '')) || 0;
+  if (!str) return 0;
+  let cleaned = str.toString().replace(/[^0-9.]/g, ''); // Keep digits + dot only
+  return parseFloat(cleaned) || 0;
 }
 
 document.addEventListener('input', function(e) {
   if (e.target.classList.contains('money-input')) {
     const cursorPos = e.target.selectionStart;
     const oldLength = e.target.value.length;
-    e.target.value = formatNumber(e.target.value);
+    let rawNum = unformatNumber(e.target.value);
+    e.target.value = rawNum > 0? formatNumber(rawNum) : '';
     const newLength = e.target.value.length;
     e.target.setSelectionRange(cursorPos + (newLength - oldLength), cursorPos + (newLength - oldLength));
     calculateCash();
@@ -337,18 +343,18 @@ document.addEventListener('input', function(e) {
 
 // FIXED CALCULATE - Works with O/M only
 function calculate(pump) {
-  const pricePMS = parseFloat(document.getElementById('pricePMS').value) || 0;
-  const priceAGO = parseFloat(document.getElementById('priceAGO').value) || 0;
-  const openPMS = parseFloat(document.getElementById(pump+'-openPMS').value) || 0;
-  const openAGO = parseFloat(document.getElementById(pump+'-openAGO').value) || 0;
-  const closePMS = parseFloat(document.getElementById(pump+'-closePMS').value) || 0;
-  const closeAGO = parseFloat(document.getElementById(pump+'-closeAGO').value) || 0;
+  const pricePMS = unformatNumber(document.getElementById('pricePMS').value);
+  const priceAGO = unformatNumber(document.getElementById('priceAGO').value);
+  const openPMS = unformatNumber(document.getElementById(pump+'-openPMS').value);
+  const openAGO = unformatNumber(document.getElementById(pump+'-openAGO').value);
+  const closePMS = unformatNumber(document.getElementById(pump+'-closePMS').value);
+  const closeAGO = unformatNumber(document.getElementById(pump+'-closeAGO').value);
 
   if (closePMS > openPMS && closePMS > 0) {
     const litersPMS = closePMS - openPMS;
     const moneyPMS = litersPMS * pricePMS;
     document.getElementById(pump+'-litersPMS').value = litersPMS.toFixed(3) + ' L';
-    document.getElementById(pump+'-moneyPMS').value = moneyPMS.toLocaleString('en-US', {maximumFractionDigits:2}) + ' UGX';
+    document.getElementById(pump+'-moneyPMS').value = formatNumber(moneyPMS) + ' UGX';
   } else {
     document.getElementById(pump+'-litersPMS').value = '';
     document.getElementById(pump+'-moneyPMS').value = '';
@@ -358,7 +364,7 @@ function calculate(pump) {
     const litersAGO = closeAGO - openAGO;
     const moneyAGO = litersAGO * priceAGO;
     document.getElementById(pump+'-litersAGO').value = litersAGO.toFixed(3) + ' L';
-    document.getElementById(pump+'-moneyAGO').value = moneyAGO.toLocaleString('en-US', {maximumFractionDigits:2}) + ' UGX';
+    document.getElementById(pump+'-moneyAGO').value = formatNumber(moneyAGO) + ' UGX';
   } else {
     document.getElementById(pump+'-litersAGO').value = '';
     document.getElementById(pump+'-moneyAGO').value = '';
@@ -368,15 +374,15 @@ function calculate(pump) {
     (closePMS > openPMS? (closePMS - openPMS) * pricePMS : 0) +
     (closeAGO > openAGO? (closeAGO - openAGO) * priceAGO : 0);
 
-  document.getElementById(pump+'-grandSales').value = grandSales > 0? grandSales.toLocaleString('en-US', {maximumFractionDigits:2}) + ' UGX' : '';
+  document.getElementById(pump+'-grandSales').value = grandSales > 0? formatNumber(grandSales) + ' UGX' : '';
   updateGrandTotal();
 }
 
 function updateGrandTotal() {
   const grandA = unformatNumber(document.getElementById('a-grandSales').value.replace(' UGX',''));
   const grandB = unformatNumber(document.getElementById('b-grandSales').value.replace(' UGX',''));
-  const finalTotal = grandA + grandB;
-  document.getElementById('grandTotal').textContent = finalTotal > 0? finalTotal.toLocaleString('en-US', {maximumFractionDigits:2}) + ' UGX' : '0 UGX';
+  const finalTotal = Math.round(grandA + grandB);
+  document.getElementById('grandTotal').textContent = finalTotal > 0? formatNumber(finalTotal) + ' UGX' : '0 UGX';
   calculateCash();
 }
 
@@ -400,7 +406,9 @@ function addInvoice() {
   container.appendChild(newInvoice);
 }
 
+// FIXED CASH CALCULATION - No more 35M bug
 function calculateCash() {
+  const grandTotal = unformatNumber(document.getElementById('grandTotal').textContent.replace(' UGX',''));
   const momo = unformatNumber(document.getElementById('momoAmount').value);
   const airtel = unformatNumber(document.getElementById('airtelAmount').value);
   const safe = unformatNumber(document.getElementById('safeAmount').value);
@@ -411,11 +419,10 @@ function calculateCash() {
   });
 
   const totalDeductions = momo + airtel + safe + totalInvoices;
-  const grandTotal = unformatNumber(document.getElementById('grandTotal').textContent.replace(' UGX',''));
-  const cashBalance = grandTotal - totalDeductions;
+  const cashBalance = Math.round(grandTotal - totalDeductions);
 
   document.getElementById('totalDeductions').value = totalDeductions > 0? formatNumber(totalDeductions) + ' UGX' : '';
-  document.getElementById('cashBalance').value = cashBalance >= 0? formatNumber(cashBalance.toFixed(2)) + ' UGX' : 'SHORTAGE UGX';
+  document.getElementById('cashBalance').value = cashBalance >= 0? formatNumber(cashBalance) + ' UGX' : 'SHORTAGE ' + formatNumber(Math.abs(cashBalance)) + ' UGX';
 }
 
 document.querySelectorAll('input').forEach(input => {
@@ -424,4 +431,21 @@ document.querySelectorAll('input').forEach(input => {
     if(input.id.startsWith('b-') &&!input.classList.contains('money-input')) calculate('b');
     if(input.id.startsWith('price')) { calculate('a'); calculate('b'); }
   });
+});
+
+// PWA Service Worker Registration
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js')
+   .then(() => console.log('Service Worker Registered'));
+}
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(() => {
+    if(confirm('Install Rubis Calculator App on your phone? Opens faster!')) {
+      deferredPrompt.prompt();
+    }
+  }, 3000);
 });
