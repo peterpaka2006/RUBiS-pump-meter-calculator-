@@ -61,6 +61,7 @@ function hideHistory() {
 
 function sendWhatsApp() {
   saveHistory();
+  saveInvoices(); // Save invoices before sending
 
   const dateTime = document.getElementById('currentDateTime').textContent;
   const shift = document.getElementById('shiftLabel').textContent;
@@ -88,7 +89,46 @@ function sendWhatsApp() {
 
 function printReport() {
   saveHistory();
+  saveInvoices(); // Save invoices before printing
   window.print();
+}
+
+// NEW: Save invoices to localStorage per day
+function saveInvoices() {
+  const invoices = [];
+  document.querySelectorAll('.invoice-row').forEach(row => {
+    const amount = row.querySelector('.invAmount').value;
+    const name = row.querySelector('.invName').value;
+    const plate = row.querySelector('.invPlate').value;
+    if (amount || name || plate) {
+      invoices.push({amount, name, plate});
+    }
+  });
+  const today = new Date().toLocaleDateString('en-UG');
+  localStorage.setItem('invoices_' + today, JSON.stringify(invoices));
+}
+
+// NEW: Load invoices from localStorage on app open
+function loadInvoices() {
+  const today = new Date().toLocaleDateString('en-UG');
+  const saved = JSON.parse(localStorage.getItem('invoices_' + today) || '[]');
+  const container = document.getElementById('invoicesContainer');
+
+  if (saved.length > 0) {
+    container.innerHTML = ''; // clear default empty row
+    saved.forEach(inv => {
+      const row = document.createElement('div');
+      row.className = 'invoice-row';
+      row.innerHTML = `
+        <div class="row"><label>Amount:</label><input type="text" class="invAmount money-input" value="${inv.amount}" placeholder="UGX"></div>
+        <div class="row"><label>Name:</label><input type="text" class="invName" value="${inv.name}" placeholder="Customer Name"></div>
+        <div class="row"><label>Plate:</label><input type="text" class="invPlate" value="${inv.plate}" placeholder="UAX 123X"></div>
+      `;
+      container.appendChild(row);
+    });
+  }
+  invoiceCount = saved.length || 1;
+  calculateCash();
 }
 
 window.onload = () => {
@@ -153,6 +193,7 @@ function openApp() {
   document.getElementById('loginPage').style.display = 'none';
   document.getElementById('appContainer').style.display = 'block';
   updateStaffDisplay();
+  loadInvoices(); // Load invoices when app opens
 }
 
 function switchUser() {
@@ -218,6 +259,7 @@ function hideLogoutDialog() {
 
 function confirmLogout() {
   hideLogoutDialog();
+  saveInvoices(); // Save before logout
   document.getElementById('appContainer').style.display = 'none';
   document.getElementById('loginPage').style.display = 'flex';
   document.getElementById('loginPin').value = '';
@@ -338,6 +380,7 @@ document.addEventListener('input', function(e) {
     const newLength = e.target.value.length;
     e.target.setSelectionRange(cursorPos + (newLength - oldLength), cursorPos + (newLength - oldLength));
     calculateCash();
+    saveInvoices(); // Auto-save when user types invoice amount
   }
 });
 
@@ -404,6 +447,7 @@ function addInvoice() {
     <div class="row"><label>Plate:</label><input type="text" class="invPlate" placeholder="UAX 123X"></div>
   `;
   container.appendChild(newInvoice);
+  saveInvoices(); // Save after adding new row
 }
 
 // FIXED CASH CALCULATION - No more 35M bug
@@ -436,7 +480,7 @@ document.querySelectorAll('input').forEach(input => {
 // PWA Service Worker Registration
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js')
-   .then(() => console.log('Service Worker Registered'));
+  .then(() => console.log('Service Worker Registered'));
 }
 
 let deferredPrompt;
