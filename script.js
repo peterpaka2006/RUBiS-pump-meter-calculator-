@@ -61,7 +61,8 @@ function hideHistory() {
 
 function sendWhatsApp() {
   saveHistory();
-  saveInvoices(); // Save invoices before sending
+  saveInvoices();
+  saveMeters(); // Save meters before sending
 
   const dateTime = document.getElementById('currentDateTime').textContent;
   const shift = document.getElementById('shiftLabel').textContent;
@@ -89,11 +90,12 @@ function sendWhatsApp() {
 
 function printReport() {
   saveHistory();
-  saveInvoices(); // Save invoices before printing
+  saveInvoices();
+  saveMeters(); // Save meters before printing
   window.print();
 }
 
-// NEW: Save invoices to localStorage per day
+// Save invoices to localStorage per day
 function saveInvoices() {
   const invoices = [];
   document.querySelectorAll('.invoice-row').forEach(row => {
@@ -108,14 +110,14 @@ function saveInvoices() {
   localStorage.setItem('invoices_' + today, JSON.stringify(invoices));
 }
 
-// NEW: Load invoices from localStorage on app open
+// Load invoices from localStorage on app open
 function loadInvoices() {
   const today = new Date().toLocaleDateString('en-UG');
   const saved = JSON.parse(localStorage.getItem('invoices_' + today) || '[]');
   const container = document.getElementById('invoicesContainer');
 
   if (saved.length > 0) {
-    container.innerHTML = ''; // clear default empty row
+    container.innerHTML = '';
     saved.forEach(inv => {
       const row = document.createElement('div');
       row.className = 'invoice-row';
@@ -128,6 +130,52 @@ function loadInvoices() {
     });
   }
   invoiceCount = saved.length || 1;
+  calculateCash();
+}
+
+// NEW: Save meters to localStorage per day
+function saveMeters() {
+  const today = new Date().toLocaleDateString('en-UG');
+  const meterData = {
+    pricePMS: document.getElementById('pricePMS').value,
+    priceAGO: document.getElementById('priceAGO').value,
+    a_openPMS: document.getElementById('a-openPMS').value,
+    a_openAGO: document.getElementById('a-openAGO').value,
+    a_closePMS: document.getElementById('a-closePMS').value,
+    a_closeAGO: document.getElementById('a-closeAGO').value,
+    b_openPMS: document.getElementById('b-openPMS').value,
+    b_openAGO: document.getElementById('b-openAGO').value,
+    b_closePMS: document.getElementById('b-closePMS').value,
+    b_closeAGO: document.getElementById('b-closeAGO').value,
+    momo: document.getElementById('momoAmount').value,
+    airtel: document.getElementById('airtelAmount').value,
+    safe: document.getElementById('safeAmount').value
+  };
+  localStorage.setItem('meters_' + today, JSON.stringify(meterData));
+}
+
+// NEW: Load meters from localStorage on app open
+function loadMeters() {
+  const today = new Date().toLocaleDateString('en-UG');
+  const saved = JSON.parse(localStorage.getItem('meters_' + today) || '{}');
+
+  if (saved.pricePMS) document.getElementById('pricePMS').value = saved.pricePMS;
+  if (saved.priceAGO) document.getElementById('priceAGO').value = saved.priceAGO;
+  if (saved.a_openPMS) document.getElementById('a-openPMS').value = saved.a_openPMS;
+  if (saved.a_openAGO) document.getElementById('a-openAGO').value = saved.a_openAGO;
+  if (saved.a_closePMS) document.getElementById('a-closePMS').value = saved.a_closePMS;
+  if (saved.a_closeAGO) document.getElementById('a-closeAGO').value = saved.a_closeAGO;
+  if (saved.b_openPMS) document.getElementById('b-openPMS').value = saved.b_openPMS;
+  if (saved.b_openAGO) document.getElementById('b-openAGO').value = saved.b_openAGO;
+  if (saved.b_closePMS) document.getElementById('b-closePMS').value = saved.b_closePMS;
+  if (saved.b_closeAGO) document.getElementById('b-closeAGO').value = saved.b_closeAGO;
+  if (saved.momo) document.getElementById('momoAmount').value = saved.momo;
+  if (saved.airtel) document.getElementById('airtelAmount').value = saved.airtel;
+  if (saved.safe) document.getElementById('safeAmount').value = saved.safe;
+
+  // Recalculate after loading
+  calculate('a');
+  calculate('b');
   calculateCash();
 }
 
@@ -193,7 +241,8 @@ function openApp() {
   document.getElementById('loginPage').style.display = 'none';
   document.getElementById('appContainer').style.display = 'block';
   updateStaffDisplay();
-  loadInvoices(); // Load invoices when app opens
+  loadMeters(); // Load meters first
+  loadInvoices(); // Then load invoices
 }
 
 function switchUser() {
@@ -259,7 +308,8 @@ function hideLogoutDialog() {
 
 function confirmLogout() {
   hideLogoutDialog();
-  saveInvoices(); // Save before logout
+  saveInvoices();
+  saveMeters(); // Save meters before logout
   document.getElementById('appContainer').style.display = 'none';
   document.getElementById('loginPage').style.display = 'flex';
   document.getElementById('loginPin').value = '';
@@ -360,14 +410,14 @@ setInterval(updateDateTime, 60000);
 // FIXED: Format number with commas, no decimals for UGX cash
 function formatNumber(num) {
   if (num === '' || num === null || isNaN(num)) return '';
-  num = Math.round(Number(num)); // Round to whole UGX
-  return num.toLocaleString('en-US'); // 3155715 → 3,155,715
+  num = Math.round(Number(num));
+  return num.toLocaleString('en-US');
 }
 
 // FIXED: Parse number correctly, keep decimals for calculation
 function unformatNumber(str) {
   if (!str) return 0;
-  let cleaned = str.toString().replace(/[^0-9.]/g, ''); // Keep digits + dot only
+  let cleaned = str.toString().replace(/[^0-9.]/g, '');
   return parseFloat(cleaned) || 0;
 }
 
@@ -380,7 +430,12 @@ document.addEventListener('input', function(e) {
     const newLength = e.target.value.length;
     e.target.setSelectionRange(cursorPos + (newLength - oldLength), cursorPos + (newLength - oldLength));
     calculateCash();
-    saveInvoices(); // Auto-save when user types invoice amount
+    saveInvoices();
+  }
+
+  // NEW: Auto-save meters when typing
+  if (e.target.id && (e.target.id.startsWith('a-') || e.target.id.startsWith('b-') || e.target.id.startsWith('price'))) {
+    saveMeters();
   }
 });
 
@@ -434,6 +489,7 @@ function resetPump(pump) {
     document.getElementById(pump+'-'+field).value = '';
   });
   calculate(pump);
+  saveMeters(); // Save after reset
 }
 
 function addInvoice() {
@@ -447,7 +503,7 @@ function addInvoice() {
     <div class="row"><label>Plate:</label><input type="text" class="invPlate" placeholder="UAX 123X"></div>
   `;
   container.appendChild(newInvoice);
-  saveInvoices(); // Save after adding new row
+  saveInvoices();
 }
 
 // FIXED CASH CALCULATION - No more 35M bug
@@ -471,16 +527,26 @@ function calculateCash() {
 
 document.querySelectorAll('input').forEach(input => {
   input.addEventListener('input', () => {
-    if(input.id.startsWith('a-') &&!input.classList.contains('money-input')) calculate('a');
-    if(input.id.startsWith('b-') &&!input.classList.contains('money-input')) calculate('b');
-    if(input.id.startsWith('price')) { calculate('a'); calculate('b'); }
+    if(input.id.startsWith('a-') &&!input.classList.contains('money-input')) {
+      calculate('a');
+      saveMeters(); // Save meters on input
+    }
+    if(input.id.startsWith('b-') &&!input.classList.contains('money-input')) {
+      calculate('b');
+      saveMeters(); // Save meters on input
+    }
+    if(input.id.startsWith('price')) {
+      calculate('a');
+      calculate('b');
+      saveMeters(); // Save prices too
+    }
   });
 });
 
 // PWA Service Worker Registration
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js')
-  .then(() => console.log('Service Worker Registered'));
+ .then(() => console.log('Service Worker Registered'));
 }
 
 let deferredPrompt;
